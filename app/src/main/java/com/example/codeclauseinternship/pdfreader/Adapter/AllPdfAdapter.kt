@@ -9,9 +9,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.codeclauseinternship.pdfreader.Model.FileModel
 import com.example.codeclauseinternship.pdfreader.R
-import kotlin.collections.ArrayList
 
-class AllPdfAdapter(private val list: ArrayList<FileModel>) :
+
+class AllPdfAdapter(private var list: ArrayList<FileModel>) :
     RecyclerView.Adapter<AllPdfAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -43,4 +43,10 @@ class AllPdfAdapter(private val list: ArrayList<FileModel>) :
         val tvDate: TextView = itemView.findViewById(R.id.tvDate)
         val tvSize: TextView = itemView.findViewById(R.id.tvSize)
     }
+
+    fun updateList(arrayList: ArrayList<FileModel>) {
+        this.list = arrayList
+        notifyDataSetChanged()
+    }
+
 }

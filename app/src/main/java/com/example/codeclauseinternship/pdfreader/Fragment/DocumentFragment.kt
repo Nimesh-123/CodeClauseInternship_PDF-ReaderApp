@@ -3,7 +3,8 @@ package com.example.codeclauseinternship.pdfreader.Fragment
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,12 +16,14 @@ import com.example.codeclauseinternship.pdfreader.databinding.FragmentDocumentBi
 import java.io.File
 import java.lang.Math.log10
 import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlin.math.pow
 
 
 class DocumentFragment : Fragment() {
 
     private lateinit var binding: FragmentDocumentBinding
+    private var adapter: AllPdfAdapter? = null
 
     private var fileModelArrayList: ArrayList<File> = ArrayList()
     private var list: ArrayList<FileModel> = ArrayList()
@@ -31,31 +34,66 @@ class DocumentFragment : Fragment() {
     ): View {
         binding = FragmentDocumentBinding.inflate(layoutInflater, container, false)
 
-        getFile(File(Environment.getExternalStorageDirectory().absolutePath))
+        val pdfFile = File(
+            Environment.getExternalStorageDirectory().absolutePath
+        )
+        getFile(pdfFile)
+
+        binding.rvAllDocument.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvAllDocument.adapter = AllPdfAdapter(list)
 
         isEmpty()
+
+        binding.edSearch.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                filter(s.toString());
+
+
+            }
+        })
 
         return binding.root
     }
 
+    fun filter(str: String) {
+        val arrayList: ArrayList<FileModel> = list
+        if (str.isNotEmpty()) {
+            val arrayList2 = ArrayList<FileModel>()
+            val it: Iterator<FileModel> = arrayList.iterator()
+            while (it.hasNext()) {
+                val next = it.next()
+                if (next.filename!!.lowercase(Locale.getDefault())
+                        .contains(str.lowercase(Locale.getDefault()))
+                ) {
+                    arrayList2.add(next)
+                }
+            }
+            adapter?.updateList(arrayList2)
+            return
+        }
+        adapter?.updateList(list)
+    }
+
+
     @SuppressLint("SimpleDateFormat")
     fun getFile(file: File): ArrayList<File> {
         val listFiles = file.listFiles()
-        Log.d("fatal", "getFile: " + file.listFiles())
         if (listFiles != null && listFiles.isNotEmpty()) {
-            Log.d("fatal", "getFile: 000000")
             for (i in listFiles.indices) {
-                Log.d("fatal", "getFile: 11111")
                 if (listFiles[i].isDirectory) {
-                    Log.d("fatal", "getFile: 22222")
                     fileModelArrayList.add(listFiles[i])
                     getFile(listFiles[i])
                 } else if (listFiles[i].name.endsWith(".pdf")) {
-                    Log.d("fatal", "getFile: 333333")
                     fileModelArrayList.add(listFiles[i])
                     val lastModified = listFiles[i].lastModified()
-                    val simpleDateFormat = SimpleDateFormat("hh:mm a  |  dd, MMMM yyyy")
-                    Log.d("fatal", "getFile: " + listFiles[i].name)
+                    val simpleDateFormat = SimpleDateFormat("dd, MMMM yyyy  |")
                     val fileModel = FileModel(
                         listFiles[i].path,
                         simpleDateFormat.format(java.lang.Long.valueOf(lastModified)),
@@ -64,15 +102,12 @@ class DocumentFragment : Fragment() {
                         readableFileSize(listFiles[i].length())
                     )
                     list.add(fileModel)
-                    Log.d("fatal", "getFile: " + list.size)
-                    binding.rvAllDocument.layoutManager = LinearLayoutManager(requireContext())
-                    binding.rvAllDocument.adapter = AllPdfAdapter(list)
+
                 }
             }
         }
         return fileModelArrayList
     }
-
 
     fun readableFileSize(size: Long): String {
         if (size <= 0) {

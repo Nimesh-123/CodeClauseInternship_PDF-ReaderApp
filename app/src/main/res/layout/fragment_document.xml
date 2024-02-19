@@ -3,12 +3,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragment.DocumentFragment">
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/llSearch"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_marginHorizontal="@dimen/_15sdp"
+        android:layout_marginVertical="@dimen/_15sdp"
+        android:background="@drawable/bg_stroke"
+        android:gravity="center"
+        android:padding="10dp">
+
+        <ImageView
+            android:layout_width="@dimen/_18sdp"
+            android:layout_height="@dimen/_18sdp"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:src="@drawable/baseline_search_24" />
+
+        <EditText
+            android:id="@+id/edSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="@dimen/_10sdp"
+            android:background="@null"
+            android:hint="@string/search_here"
+            android:maxLines="1"
+            android:textColor="#828282"
+            android:textColorHint="#828282"
+            android:textSize="@dimen/_12ssp" />
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvAllDocument"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/llSearch" />
 
     <TextView
         android:id="@+id/tvNoData"
@@ -17,8 +50,8 @@
         android:layout_centerInParent="true"
         android:fontFamily="@font/kanit_medium"
         android:text="No Data Found"
-        android:visibility="gone"
         android:textColor="@color/grey"
-        android:textSize="@dimen/_14ssp" />
+        android:textSize="@dimen/_14ssp"
+        android:visibility="gone" />
 
 </RelativeLayout>
