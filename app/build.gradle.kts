@@ -56,5 +56,8 @@ dependencies {
     //lottie
     implementation ("com.airbnb.android:lottie:6.1.0")
 
-    implementation ("com.karumi:dexter:6.2.3")
+    implementation ("com.github.barteksc:android-pdf-viewer:2.8.2")
+
+
+
 }

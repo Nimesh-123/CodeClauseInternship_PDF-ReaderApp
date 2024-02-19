@@ -9,6 +9,6 @@
     <style name="Theme.PDFReader" parent="Base.Theme.PDFReader" />
 
     <style name="ToolbarStyle1">
-        <item name="colorControlNormal">@color/black</item>
+        <item name="colorControlNormal">@color/white</item>
     </style>
 </resources>

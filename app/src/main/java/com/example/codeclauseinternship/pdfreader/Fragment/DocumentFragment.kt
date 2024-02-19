@@ -1,6 +1,7 @@
 package com.example.codeclauseinternship.pdfreader.Fragment
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
 import android.text.Editable
@@ -11,7 +12,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.codeclauseinternship.pdfreader.Adapter.AllPdfAdapter
+import com.example.codeclauseinternship.pdfreader.Interface.OnClick
+import com.example.codeclauseinternship.pdfreader.MainActivity
 import com.example.codeclauseinternship.pdfreader.Model.FileModel
+import com.example.codeclauseinternship.pdfreader.PdfViewer
 import com.example.codeclauseinternship.pdfreader.databinding.FragmentDocumentBinding
 import java.io.File
 import java.lang.Math.log10
@@ -20,7 +24,7 @@ import java.util.Locale
 import kotlin.math.pow
 
 
-class DocumentFragment : Fragment() {
+class DocumentFragment : Fragment() ,OnClick{
 
     private lateinit var binding: FragmentDocumentBinding
     private var adapter: AllPdfAdapter? = null
@@ -40,7 +44,7 @@ class DocumentFragment : Fragment() {
         getFile(pdfFile)
 
         binding.rvAllDocument.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvAllDocument.adapter = AllPdfAdapter(list)
+        binding.rvAllDocument.adapter = AllPdfAdapter(list,this)
 
         isEmpty()
 
@@ -133,5 +137,12 @@ class DocumentFragment : Fragment() {
             binding.tvNoData.visibility = View.GONE
             binding.rvAllDocument.visibility = View.VISIBLE
         }
+    }
+
+    override fun onClick(pos: Int) {
+        val intent = Intent(requireContext(), PdfViewer::class.java)
+        intent.putExtra("fileName", list[pos].filename)
+        intent.putExtra("filePath", list[pos].path)
+        startActivity(intent)
     }
 }
