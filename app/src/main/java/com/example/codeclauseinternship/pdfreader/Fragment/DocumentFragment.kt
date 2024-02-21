@@ -120,7 +120,7 @@ class DocumentFragment : Fragment(), OnClick {
                 list[pos].path,
                 list[pos].date,
                 list[pos].filename,
-                false,
+                dbHelper!!.isAlreadyAvailableFavourite(list[pos].path.toString()),
                 list[pos].size
             )
         dbHelper?.insertHistory(historyModel)

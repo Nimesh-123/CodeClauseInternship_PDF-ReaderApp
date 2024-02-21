@@ -22,20 +22,12 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
 
     override fun onCreate(db: SQLiteDatabase?) {
 
-        val CREATE_HISTORY_TABLE = ("CREATE TABLE " + TABLE_HISTORY + "("
-                + KEY_ID + " INTEGER PRIMARY KEY,"
-                + KEY_PATH + " TEXT,"
-                + KEY_FILRENAME + " TEXT,"
-                + KEY_SIZE + " TEXT,"
-                + KEY_DATE + " TEXT" + ")")
+        val CREATE_HISTORY_TABLE =
+            ("CREATE TABLE " + TABLE_HISTORY + "(" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_PATH + " TEXT," + KEY_FILRENAME + " TEXT," + KEY_SIZE + " TEXT," + KEY_DATE + " TEXT" + ")")
         db?.execSQL(CREATE_HISTORY_TABLE)
 
-        val CREATE_FAV_TABLE1 = ("CREATE TABLE " + TABLE_FAV + "("
-                + KEY_ID + " INTEGER PRIMARY KEY,"
-                + KEY_PATH + " TEXT,"
-                + KEY_FILRENAME + " TEXT,"
-                + KEY_SIZE + " TEXT,"
-                + KEY_DATE + " TEXT" + ")")
+        val CREATE_FAV_TABLE1 =
+            ("CREATE TABLE " + TABLE_FAV + "(" + KEY_ID + " INTEGER PRIMARY KEY," + KEY_PATH + " TEXT," + KEY_FILRENAME + " TEXT," + KEY_SIZE + " TEXT," + KEY_DATE + " TEXT" + ")")
         db?.execSQL(CREATE_FAV_TABLE1)
     }
 
@@ -71,7 +63,13 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
             writableDatabase.rawQuery("select * from HistoryTable ORDER BY id DESC", null)
         rawQuery.moveToFirst()
         while (!rawQuery.isAfterLast) {
-            val historyModel = HistoryModel(rawQuery.getString(1),rawQuery.getString(4),rawQuery.getString(2),false,rawQuery.getString(3))
+            val historyModel = HistoryModel(
+                rawQuery.getString(1),
+                rawQuery.getString(4),
+                rawQuery.getString(2),
+                false,
+                rawQuery.getString(3)
+            )
             arrayList.add(historyModel)
             rawQuery.moveToNext()
         }
@@ -82,11 +80,16 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
     fun getFavData(): ArrayList<FavModel> {
         val writableDatabase = writableDatabase
         val arrayList = ArrayList<FavModel>()
-        val rawQuery =
-            writableDatabase.rawQuery("select * from FavTable ORDER BY id DESC", null)
+        val rawQuery = writableDatabase.rawQuery("select * from FavTable ORDER BY id DESC", null)
         rawQuery.moveToFirst()
         while (!rawQuery.isAfterLast) {
-            val historyModel = FavModel(rawQuery.getString(1),rawQuery.getString(4),rawQuery.getString(2),false,rawQuery.getString(3))
+            val historyModel = FavModel(
+                rawQuery.getString(1),
+                rawQuery.getString(4),
+                rawQuery.getString(2),
+                false,
+                rawQuery.getString(3)
+            )
             arrayList.add(historyModel)
             rawQuery.moveToNext()
         }
@@ -98,8 +101,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
         val writableDatabase = writableDatabase
         val arrayList: ArrayList<*> = ArrayList<Any?>()
         val rawQuery = writableDatabase.rawQuery(
-            "select * from HistoryTable where path='$str'",
-            null
+            "select * from HistoryTable where path='$str'", null
         )
         rawQuery.moveToFirst()
         while (!rawQuery.isAfterLast) {
@@ -113,8 +115,9 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
     fun isAlreadyAvailableFavourite(str: String): Boolean {
         val writableDatabase = writableDatabase
         val arrayList: ArrayList<*> = ArrayList<Any?>()
-        val rawQuery =
-            writableDatabase.rawQuery("select * from FavTable where file_path='$str'", null)
+        val rawQuery = writableDatabase.rawQuery(
+            "select * from FavTable where path='$str'", null
+        )
         rawQuery.moveToFirst()
         while (!rawQuery.isAfterLast) {
             arrayList.add(rawQuery.getString(1) as Nothing)
@@ -128,9 +131,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
     fun removeOldHistory(str: String): Int? {
         return Integer.valueOf(
             writableDatabase.delete(
-                TABLE_HISTORY,
-                "path = ? ",
-                arrayOf(str)
+                TABLE_HISTORY, "path = ? ", arrayOf(str)
             )
         )
     }
@@ -139,9 +140,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
     fun removeOldFavDocument(str: String): Int? {
         return Integer.valueOf(
             writableDatabase.delete(
-                TABLE_FAV,
-                "path = ? ",
-                arrayOf(str)
+                TABLE_FAV, "path = ? ", arrayOf(str)
             )
         )
     }

@@ -41,16 +41,16 @@ class AllPdfAdapter(
             onClick.onClick(position)
         }
         holder.ivFav.setOnClickListener {
-            if (ViewModel.isBookmarked) {
+            if (ViewModel.isBookmarked == true) {
                 ViewModel.isBookmarked = false
-                dbHelper!!.removeOldFavDocument(list[position].path.toString())
+                dbHelper!!.removeOldFavDocument(list[position].path!!)
                 holder.ivFav.setImageResource(R.drawable.baseline_favorite_24)
             } else {
                 val fileModel = FavModel(
                     list[position].path,
                     list[position].date,
                     list[position].filename,
-                    false,
+                    dbHelper!!.isAlreadyAvailableFavourite(list[position].path!!),
                     list[position].size
                 )
                 dbHelper!!.insertFav(fileModel)
