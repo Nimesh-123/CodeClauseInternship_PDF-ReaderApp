@@ -135,6 +135,8 @@ class MainActivity : AppCompatActivity() {
         } else if (isDeleted) {
             isDeleted = false
             init()
+        }else{
+            init()
         }
 
     }

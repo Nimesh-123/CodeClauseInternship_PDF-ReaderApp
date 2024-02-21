@@ -4,17 +4,17 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.codeclauseinternship.pdfreader.Adapter.AllPdfAdapter
+import com.example.codeclauseinternship.pdfreader.DataBase.DBHelper
 import com.example.codeclauseinternship.pdfreader.Interface.OnClick
-import com.example.codeclauseinternship.pdfreader.MainActivity
 import com.example.codeclauseinternship.pdfreader.Model.FileModel
+import com.example.codeclauseinternship.pdfreader.Model.HistoryModel
 import com.example.codeclauseinternship.pdfreader.PdfViewer
 import com.example.codeclauseinternship.pdfreader.databinding.FragmentDocumentBinding
 import java.io.File
@@ -24,13 +24,14 @@ import java.util.Locale
 import kotlin.math.pow
 
 
-class DocumentFragment : Fragment() ,OnClick{
+class DocumentFragment : Fragment(), OnClick {
 
     private lateinit var binding: FragmentDocumentBinding
     private var adapter: AllPdfAdapter? = null
 
     private var fileModelArrayList: ArrayList<File> = ArrayList()
     private var list: ArrayList<FileModel> = ArrayList()
+    private var dbHelper: DBHelper? = null
 
 
     override fun onCreateView(
@@ -38,53 +39,20 @@ class DocumentFragment : Fragment() ,OnClick{
     ): View {
         binding = FragmentDocumentBinding.inflate(layoutInflater, container, false)
 
+        dbHelper = DBHelper(requireContext())
+
         val pdfFile = File(
             Environment.getExternalStorageDirectory().absolutePath
         )
         getFile(pdfFile)
 
         binding.rvAllDocument.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvAllDocument.adapter = AllPdfAdapter(list,this)
+        binding.rvAllDocument.adapter = AllPdfAdapter(requireContext(),list, this)
 
         isEmpty()
 
-        binding.edSearch.addTextChangedListener(object : TextWatcher {
-
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                filter(s.toString());
-
-
-            }
-        })
-
         return binding.root
     }
-
-    fun filter(str: String) {
-        val arrayList: ArrayList<FileModel> = list
-        if (str.isNotEmpty()) {
-            val arrayList2 = ArrayList<FileModel>()
-            val it: Iterator<FileModel> = arrayList.iterator()
-            while (it.hasNext()) {
-                val next = it.next()
-                if (next.filename!!.lowercase(Locale.getDefault())
-                        .contains(str.lowercase(Locale.getDefault()))
-                ) {
-                    arrayList2.add(next)
-                }
-            }
-            adapter?.updateList(arrayList2)
-            return
-        }
-        adapter?.updateList(list)
-    }
-
 
     @SuppressLint("SimpleDateFormat")
     fun getFile(file: File): ArrayList<File> {
@@ -102,7 +70,7 @@ class DocumentFragment : Fragment() ,OnClick{
                         listFiles[i].path,
                         simpleDateFormat.format(java.lang.Long.valueOf(lastModified)),
                         listFiles[i].name,
-                        false,
+                        dbHelper!!.isAlreadyAvailableFavourite(listFiles[i].path),
                         readableFileSize(listFiles[i].length())
                     )
                     list.add(fileModel)
@@ -144,5 +112,18 @@ class DocumentFragment : Fragment() ,OnClick{
         intent.putExtra("fileName", list[pos].filename)
         intent.putExtra("filePath", list[pos].path)
         startActivity(intent)
+        if (dbHelper?.isAlreadyAvailableHistory(list[pos].path.toString()) == true) {
+            return
+        }
+        val historyModel =
+            HistoryModel(
+                list[pos].path,
+                list[pos].date,
+                list[pos].filename,
+                false,
+                list[pos].size
+            )
+        dbHelper?.insertHistory(historyModel)
+
     }
 }

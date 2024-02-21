@@ -6,7 +6,6 @@ import com.example.codeclauseinternship.pdfreader.databinding.ActivityPdfViewerB
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle
 import java.io.File
 
-
 class PdfViewer : AppCompatActivity() {
 
     private lateinit var binding: ActivityPdfViewerBinding

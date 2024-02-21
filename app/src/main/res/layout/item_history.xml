@@ -68,19 +68,11 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/ivFav"
-            android:layout_width="@dimen/_20sdp"
-            android:layout_height="@dimen/_20sdp"
-            android:layout_marginEnd="@dimen/_5sdp"
-            android:layout_gravity="center"
-            android:src="@drawable/baseline_favorite_border_24" />
-
-        <ImageView
-            android:id="@+id/ivMore"
+            android:id="@+id/ivDelete"
             android:layout_width="@dimen/_20sdp"
             android:layout_height="@dimen/_20sdp"
             android:layout_gravity="center"
-            android:src="@drawable/baseline_more_vert_24" />
+            android:src="@drawable/baseline_delete_24" />
 
     </LinearLayout>
 
