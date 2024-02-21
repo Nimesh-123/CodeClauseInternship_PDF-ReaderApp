@@ -99,13 +99,13 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
 
     fun isAlreadyAvailableHistory(str: String): Boolean {
         val writableDatabase = writableDatabase
-        val arrayList: ArrayList<*> = ArrayList<Any?>()
+        val arrayList: ArrayList<String> = ArrayList<String>()
         val rawQuery = writableDatabase.rawQuery(
             "select * from HistoryTable where path='$str'", null
         )
         rawQuery.moveToFirst()
         while (!rawQuery.isAfterLast) {
-            arrayList.add(rawQuery.getString(1) as Nothing)
+            arrayList.add(rawQuery.getString(1))
             rawQuery.moveToNext()
         }
         rawQuery.close()
@@ -114,13 +114,13 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "DocumentDataBase",
 
     fun isAlreadyAvailableFavourite(str: String): Boolean {
         val writableDatabase = writableDatabase
-        val arrayList: ArrayList<*> = ArrayList<Any?>()
+        val arrayList: ArrayList<String> = ArrayList<String>()
         val rawQuery = writableDatabase.rawQuery(
             "select * from FavTable where path='$str'", null
         )
         rawQuery.moveToFirst()
         while (!rawQuery.isAfterLast) {
-            arrayList.add(rawQuery.getString(1) as Nothing)
+            arrayList.add(rawQuery.getString(1))
             rawQuery.moveToNext()
         }
         rawQuery.close()

@@ -17,14 +17,19 @@ import com.example.codeclauseinternship.pdfreader.R
 class AllPdfAdapter(
     private var context: Context,
     private var list: ArrayList<FileModel>,
-    private var onClick: OnClick
 ) : RecyclerView.Adapter<AllPdfAdapter.ViewHolder>() {
-    private var dbHelper: DBHelper? = null
+    private lateinit var dbHelper: DBHelper
+
+    private lateinit var onClick: OnClick
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.item_document, parent, false)
         return ViewHolder(view)
+    }
+
+    fun setOnClickListener(onClick: OnClick){
+        this.onClick = onClick
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -66,7 +71,6 @@ class AllPdfAdapter(
     }
 
     class ViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {
-        val ivMore: ImageView = itemView.findViewById(R.id.ivMore)
         val ivFav: ImageView = itemView.findViewById(R.id.ivFav)
         val tvName: TextView = itemView.findViewById(R.id.tvName)
         val tvDate: TextView = itemView.findViewById(R.id.tvDate)

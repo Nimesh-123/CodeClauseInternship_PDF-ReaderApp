@@ -1,49 +1,46 @@
-package com.example.codeclauseinternship.pdfreader.Fragment
+package com.example.codeclauseinternship.pdfreader
 
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.codeclauseinternship.pdfreader.Adapter.FavAdapter
 import com.example.codeclauseinternship.pdfreader.DataBase.DBHelper
 import com.example.codeclauseinternship.pdfreader.Interface.OnClickHistory
 import com.example.codeclauseinternship.pdfreader.Model.FavModel
-import com.example.codeclauseinternship.pdfreader.PdfViewer
-import com.example.codeclauseinternship.pdfreader.databinding.FragmentBookMarkBinding
+import com.example.codeclauseinternship.pdfreader.databinding.ActivityFavBinding
+import com.example.codeclauseinternship.pdfreader.databinding.ActivityMainBinding
 
-class BookMarkFragment : Fragment() , OnClickHistory {
+class FavActivity : AppCompatActivity(), OnClickHistory {
 
-    lateinit var binding: FragmentBookMarkBinding
+    private lateinit var binding: ActivityFavBinding
 
     private var list: ArrayList<FavModel> = ArrayList()
 
     private var dbHelper: DBHelper? = null
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
+        binding = ActivityFavBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        }
-    }
+        setSupportActionBar(binding.toolBar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setHomeButtonEnabled(true)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentBookMarkBinding.inflate(layoutInflater, container, false)
-
-        dbHelper = DBHelper(requireContext())
+        dbHelper = DBHelper(this)
         list = dbHelper!!.getFavData()
 
         isEmpty()
 
-        binding.rvFav.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvFav.layoutManager = LinearLayoutManager(this)
         binding.rvFav.adapter = FavAdapter(list, this)
 
-        return binding.root
     }
+
     private fun isEmpty() {
         if (list.isEmpty()) {
             binding.tvNoData.visibility = View.VISIBLE;
@@ -55,7 +52,7 @@ class BookMarkFragment : Fragment() , OnClickHistory {
     }
 
     override fun onClick(pos: Int) {
-        val intent = Intent(requireContext(), PdfViewer::class.java)
+        val intent = Intent(this, PdfViewer::class.java)
         intent.putExtra("fileName", list[pos].filename)
         intent.putExtra("filePath", list[pos].path)
         startActivity(intent)
@@ -65,10 +62,18 @@ class BookMarkFragment : Fragment() , OnClickHistory {
         dbHelper?.removeOldFavDocument(list[pos].path.toString())
         list.clear()
         list = dbHelper!!.getFavData()
-        binding.rvFav.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvFav.layoutManager = LinearLayoutManager(this)
         binding.rvFav.adapter = FavAdapter(list, this)
         isEmpty()
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return super.onSupportNavigateUp()
+    }
+
+    override fun onBackPressed() {
+        finish()
+    }
 
 }

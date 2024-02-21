@@ -75,12 +75,6 @@
             android:layout_gravity="center"
             android:src="@drawable/baseline_favorite_border_24" />
 
-        <ImageView
-            android:id="@+id/ivMore"
-            android:layout_width="@dimen/_20sdp"
-            android:layout_height="@dimen/_20sdp"
-            android:layout_gravity="center"
-            android:src="@drawable/baseline_more_vert_24" />
 
     </LinearLayout>
 

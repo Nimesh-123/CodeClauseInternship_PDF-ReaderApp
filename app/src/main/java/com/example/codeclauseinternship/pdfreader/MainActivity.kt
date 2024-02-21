@@ -1,10 +1,12 @@
 package com.example.codeclauseinternship.pdfreader
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -14,19 +16,23 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.codeclauseinternship.pdfreader.Adapter.QuestionTabAdapter
-import com.example.codeclauseinternship.pdfreader.Fragment.BookMarkFragment
-import com.example.codeclauseinternship.pdfreader.Fragment.DocumentFragment
-import com.example.codeclauseinternship.pdfreader.Fragment.RecentFragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.codeclauseinternship.pdfreader.Adapter.AllPdfAdapter
+import com.example.codeclauseinternship.pdfreader.DataBase.DBHelper
+import com.example.codeclauseinternship.pdfreader.Interface.OnClick
+import com.example.codeclauseinternship.pdfreader.Model.FileModel
+import com.example.codeclauseinternship.pdfreader.Model.HistoryModel
 import com.example.codeclauseinternship.pdfreader.databinding.ActivityMainBinding
 import com.google.android.material.card.MaterialCardView
+import java.io.File
+import java.text.SimpleDateFormat
+import kotlin.math.pow
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private var fragments = arrayOf(DocumentFragment(), BookMarkFragment(), RecentFragment())
 
     var permission = arrayOf(
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -35,27 +41,33 @@ class MainActivity : AppCompatActivity() {
     var isDeleted = true
     var isdialog = false
 
+    private var allPdfAdapter: AllPdfAdapter? = null
+
+    private var fileModelArrayList: ArrayList<File> = ArrayList()
+    private var list: ArrayList<FileModel> = ArrayList()
+    private var dbHelper: DBHelper? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
     }
 
     private fun init() {
+        dbHelper = DBHelper(this)
+        pdfLoader().execute()
 
-        val questionTabAdapter = QuestionTabAdapter(supportFragmentManager, fragments)
-        binding.viewpager.adapter = questionTabAdapter
+        binding.ivFav.setOnClickListener {
+            val intent = Intent(applicationContext, FavActivity::class.java)
+            startActivity(intent)
+        }
 
-        binding.llHome.setOnClickListener {
-            binding.viewpager.currentItem = 0
-        }
-        binding.llBookMark.setOnClickListener {
-            binding.viewpager.currentItem = 1
-        }
-        binding.llHistory.setOnClickListener {
-            binding.viewpager.currentItem = 2
+        binding.ivHistory.setOnClickListener {
+            val intent = Intent(applicationContext, HistoryActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -135,34 +147,121 @@ class MainActivity : AppCompatActivity() {
         } else if (isDeleted) {
             isDeleted = false
             init()
-        }else{
-            init()
+        }
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun getFile(file: File): ArrayList<File> {
+        val listFiles = file.listFiles()
+        if (listFiles != null && listFiles.isNotEmpty()) {
+            for (i in listFiles.indices) {
+                if (listFiles[i].isDirectory) {
+                    fileModelArrayList.add(listFiles[i])
+                    getFile(listFiles[i])
+                } else if (listFiles[i].name.endsWith(".pdf")) {
+                    fileModelArrayList.add(listFiles[i])
+                    val lastModified = listFiles[i].lastModified()
+                    val simpleDateFormat = SimpleDateFormat("dd, MMMM yyyy  |")
+                    val fileModel = FileModel(
+                        listFiles[i].path,
+                        simpleDateFormat.format(java.lang.Long.valueOf(lastModified)),
+                        listFiles[i].name,
+                        false,
+                        readableFileSize(listFiles[i].length())
+                    )
+                    list.add(fileModel)
+
+                }
+            }
+        }
+        return fileModelArrayList
+    }
+
+    fun readableFileSize(size: Long): String {
+        if (size <= 0) {
+            return "0"
+        }
+        val units = arrayOf("B", "kB", "MB", "GB", "TB", "EB")
+        val log = Math.log10(size.toDouble()) / Math.log10(1024.0)
+        val index = log.toInt()
+        val formattedSize = String.format("%.1f", size / 1024.0.pow(index))
+        return "$formattedSize ${units[index]}"
+    }
+
+    private fun isEmpty() {
+        if (list.isEmpty()) {
+            binding.tvNoData.visibility = View.VISIBLE;
+            binding.rvAllDocument.visibility = View.GONE
+        } else {
+            binding.tvNoData.visibility = View.GONE
+            binding.rvAllDocument.visibility = View.VISIBLE
+        }
+    }
+
+    inner class pdfLoader : AsyncTask<Void, Void, Void>() {
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+            binding.progress.visibility = View.VISIBLE
         }
 
+        override fun doInBackground(vararg p0: Void?): Void? {
+            val pdfFile = File(
+                Environment.getExternalStorageDirectory().absolutePath
+            )
+            getFile(pdfFile)
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+            binding.progress.visibility = View.GONE
+            binding.rvAllDocument.layoutManager = LinearLayoutManager(applicationContext)
+            allPdfAdapter = AllPdfAdapter(applicationContext, list)
+            binding.rvAllDocument.adapter = allPdfAdapter
+
+            allPdfAdapter!!.setOnClickListener(object : OnClick {
+                override fun onClick(pos: Int) {
+                    val intent = Intent(applicationContext, PdfViewer::class.java)
+                    intent.putExtra("fileName", list[pos].filename)
+                    intent.putExtra("filePath", list[pos].path)
+                    startActivity(intent)
+                    if (dbHelper?.isAlreadyAvailableHistory(list[pos].path.toString()) == true) {
+                        return
+                    }
+                    val historyModel =
+                        HistoryModel(
+                            list[pos].path,
+                            list[pos].date,
+                            list[pos].filename,
+                            dbHelper!!.isAlreadyAvailableFavourite(list[pos].path.toString()),
+                            list[pos].size
+                        )
+                    dbHelper?.insertHistory(historyModel)
+
+                }
+            })
+        }
     }
 
 
     override fun onBackPressed() {
 
-        if (binding.viewpager.currentItem == 0) {
-            val dialog = Dialog(this)
-            dialog.setContentView(R.layout.exit_dialog)
-            dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            dialog.setCancelable(false)
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.exit_dialog)
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(false)
 
-            val btnNo = dialog.findViewById<TextView>(R.id.ext_btn_no)
-            val btnYes = dialog.findViewById<TextView>(R.id.ext_btn_yes)
+        val btnNo = dialog.findViewById<TextView>(R.id.ext_btn_no)
+        val btnYes = dialog.findViewById<TextView>(R.id.ext_btn_yes)
 
-            btnNo.setOnClickListener {
-                dialog.dismiss()
-            }
-            btnYes.setOnClickListener {
-                super.onBackPressed()
-                dialog.dismiss()
-            }
-            dialog.show()
-        } else {
-            binding.viewpager.currentItem = binding.viewpager.currentItem - 1
+        btnNo.setOnClickListener {
+            dialog.dismiss()
         }
+        btnYes.setOnClickListener {
+            super.onBackPressed()
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 }

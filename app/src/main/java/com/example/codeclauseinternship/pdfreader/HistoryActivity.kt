@@ -1,22 +1,19 @@
-package com.example.codeclauseinternship.pdfreader.Fragment
+package com.example.codeclauseinternship.pdfreader
 
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.codeclauseinternship.pdfreader.Adapter.HistoryAdapter
 import com.example.codeclauseinternship.pdfreader.DataBase.DBHelper
 import com.example.codeclauseinternship.pdfreader.Interface.OnClickHistory
 import com.example.codeclauseinternship.pdfreader.Model.HistoryModel
-import com.example.codeclauseinternship.pdfreader.PdfViewer
-import com.example.codeclauseinternship.pdfreader.databinding.FragmentRecentBinding
+import com.example.codeclauseinternship.pdfreader.databinding.ActivityHistoryBinding
 
-class RecentFragment : Fragment() , OnClickHistory {
+class HistoryActivity : AppCompatActivity(), OnClickHistory {
 
-    lateinit var binding: FragmentRecentBinding
+    lateinit var binding: ActivityHistoryBinding
 
     private var list: ArrayList<HistoryModel> = ArrayList()
 
@@ -24,26 +21,23 @@ class RecentFragment : Fragment() , OnClickHistory {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-        }
-    }
+        binding = ActivityHistoryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentRecentBinding.inflate(layoutInflater,container,false)
+        setSupportActionBar(binding.toolBar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setHomeButtonEnabled(true)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
 
-
-        dbHelper = DBHelper(requireContext())
+        dbHelper = DBHelper(this)
         list = dbHelper!!.getHistoryData()
 
         isEmpty()
 
-        binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvHistory.layoutManager = LinearLayoutManager(this)
         binding.rvHistory.adapter = HistoryAdapter(list, this)
 
-        return binding.root
     }
-
 
     private fun isEmpty() {
         if (list.isEmpty()) {
@@ -56,7 +50,7 @@ class RecentFragment : Fragment() , OnClickHistory {
     }
 
     override fun onClick(pos: Int) {
-        val intent = Intent(requireContext(), PdfViewer::class.java)
+        val intent = Intent(this, PdfViewer::class.java)
         intent.putExtra("fileName", list[pos].filename)
         intent.putExtra("filePath", list[pos].path)
         startActivity(intent)
@@ -66,9 +60,16 @@ class RecentFragment : Fragment() , OnClickHistory {
         dbHelper?.removeOldHistory(list[pos].path.toString())
         list.clear()
         list = dbHelper!!.getHistoryData()
-        binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvHistory.layoutManager = LinearLayoutManager(this)
         binding.rvHistory.adapter = HistoryAdapter(list, this)
         isEmpty()
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return super.onSupportNavigateUp()
+    }
+    override fun onBackPressed() {
+        finish()
+    }
 }
