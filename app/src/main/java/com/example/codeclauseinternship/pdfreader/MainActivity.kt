@@ -53,7 +53,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
     }
 
     private fun init() {
@@ -146,6 +145,7 @@ class MainActivity : AppCompatActivity() {
             }
         } else if (isDeleted) {
             isDeleted = false
+            Log.d("fatal", "onResume: 11111")
             init()
         }
     }
@@ -166,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                         listFiles[i].path,
                         simpleDateFormat.format(java.lang.Long.valueOf(lastModified)),
                         listFiles[i].name,
-                        false,
+                        dbHelper!!.isAlreadyAvailableFavourite(listFiles[i].path.toString()),
                         readableFileSize(listFiles[i].length())
                     )
                     list.add(fileModel)
@@ -209,12 +209,14 @@ class MainActivity : AppCompatActivity() {
             val pdfFile = File(
                 Environment.getExternalStorageDirectory().absolutePath
             )
+            list.clear()
             getFile(pdfFile)
             return null
         }
 
         override fun onPostExecute(result: Void?) {
             super.onPostExecute(result)
+            isEmpty()
             binding.progress.visibility = View.GONE
             binding.rvAllDocument.layoutManager = LinearLayoutManager(applicationContext)
             allPdfAdapter = AllPdfAdapter(applicationContext, list)
@@ -241,9 +243,10 @@ class MainActivity : AppCompatActivity() {
 
                 }
             })
+
+            isEmpty()
         }
     }
-
 
     override fun onBackPressed() {
 

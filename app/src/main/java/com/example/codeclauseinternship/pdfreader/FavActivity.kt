@@ -60,7 +60,7 @@ class FavActivity : AppCompatActivity(), OnClickHistory {
 
     override fun onClickDelete(pos: Int) {
         dbHelper?.removeOldFavDocument(list[pos].path.toString())
-        list.clear()
+        list.removeAt(pos)
         list = dbHelper!!.getFavData()
         binding.rvFav.layoutManager = LinearLayoutManager(this)
         binding.rvFav.adapter = FavAdapter(list, this)

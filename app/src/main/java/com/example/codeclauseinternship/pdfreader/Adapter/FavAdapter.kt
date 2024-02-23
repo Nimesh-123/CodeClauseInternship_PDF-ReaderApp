@@ -20,7 +20,7 @@ class FavAdapter(private var list: ArrayList<FavModel>, private var onClick: OnC
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_history, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.item_fav, parent, false)
         return ViewHolder(view)
     }
 

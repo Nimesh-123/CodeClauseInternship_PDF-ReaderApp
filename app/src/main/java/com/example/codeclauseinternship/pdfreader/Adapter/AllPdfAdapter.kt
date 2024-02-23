@@ -1,6 +1,7 @@
 package com.example.codeclauseinternship.pdfreader.Adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,28 +43,35 @@ class AllPdfAdapter(
         holder.tvDate.text = ViewModel.date
         holder.tvSize.text = ViewModel.size
 
+        if (list[position].isBookmarked) {
+            holder.ivFav.setImageResource(R.drawable.baseline_favorite_24);
+        } else {
+            holder.ivFav.setImageResource(R.drawable.baseline_favorite_border_24);
+        }
+
         holder.itemView.setOnClickListener {
             onClick.onClick(position)
         }
         holder.ivFav.setOnClickListener {
-            if (ViewModel.isBookmarked == true) {
+            if (ViewModel.isBookmarked) {
+                Log.d("fatal", "onBindViewHolder: 111111")
                 ViewModel.isBookmarked = false
-                dbHelper!!.removeOldFavDocument(list[position].path!!)
-                holder.ivFav.setImageResource(R.drawable.baseline_favorite_24)
+                dbHelper.removeOldFavDocument(list[position].path!!)
+                holder.ivFav.setImageResource(R.drawable.baseline_favorite_border_24)
             } else {
+                Log.d("fatal", "onBindViewHolder: 222222")
                 val fileModel = FavModel(
                     list[position].path,
                     list[position].date,
                     list[position].filename,
-                    dbHelper!!.isAlreadyAvailableFavourite(list[position].path!!),
+                    dbHelper.isAlreadyAvailableFavourite(list[position].path!!),
                     list[position].size
                 )
-                dbHelper!!.insertFav(fileModel)
+                dbHelper.insertFav(fileModel)
                 ViewModel.isBookmarked = true
-                holder.ivFav.setImageResource(R.drawable.baseline_favorite_border_24)
+                holder.ivFav.setImageResource(R.drawable.baseline_favorite_24)
             }
         }
-
     }
 
     override fun getItemCount(): Int {
